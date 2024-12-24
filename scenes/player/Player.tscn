@@ -1,0 +1,143 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://scripts/player/Player.gd" type="Script" id=1]
+[ext_resource path="res://assets/player/char_red.png" type="Texture" id=2]
+[ext_resource path="res://scripts/player/PlayerTextura.gd" type="Script" id=3]
+
+[sub_resource type="RectangleShape2D" id=7]
+extents = Vector2( 6, 15.5 )
+
+[sub_resource type="Animation" id=4]
+resource_name = "Fall"
+length = 0.4
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("textura:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 34, 35, 36, 37 ]
+}
+
+[sub_resource type="Animation" id=1]
+resource_name = "Idle"
+length = 1.25
+loop = true
+step = 0.2
+tracks/0/type = "value"
+tracks/0/path = NodePath("textura:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 0.4, 0.6, 0.8 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 1, 2, 3, 4, 5 ]
+}
+
+[sub_resource type="Animation" id=5]
+resource_name = "Jump"
+length = 0.4
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("textura:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 27, 28, 29, 30 ]
+}
+
+[sub_resource type="Animation" id=6]
+resource_name = "Landing"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/path = NodePath("textura:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ 38, 39, 40 ]
+}
+
+[sub_resource type="Animation" id=2]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("textura:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ 0 ]
+}
+
+[sub_resource type="Animation" id=3]
+resource_name = "Run"
+length = 0.8
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("textura:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 16, 17, 18, 19, 20, 21, 22, 23 ]
+}
+
+[node name="Player" type="KinematicBody2D"]
+script = ExtResource( 1 )
+speed = 75
+jumpPower = 175
+gravity = 350
+
+[node name="textura" type="Sprite" parent="."]
+texture = ExtResource( 2 )
+hframes = 8
+vframes = 11
+script = ExtResource( 3 )
+animationPath = NodePath("../animaçao")
+playerPath = NodePath("..")
+
+[node name="colicao" type="CollisionShape2D" parent="."]
+position = Vector2( -1, 12.5 )
+shape = SubResource( 7 )
+
+[node name="animaçao" type="AnimationPlayer" parent="."]
+anims/Fall = SubResource( 4 )
+anims/Idle = SubResource( 1 )
+anims/Jump = SubResource( 5 )
+anims/Landing = SubResource( 6 )
+anims/RESET = SubResource( 2 )
+anims/Run = SubResource( 3 )
+
+[node name="level_cam" type="Camera2D" parent="."]
+current = true
+limit_left = 0
+limit_top = 0
+drag_margin_h_enabled = true
+drag_margin_v_enabled = true
+
+[connection signal="animation_finished" from="animaçao" to="textura" method="_on_animation_finished"]

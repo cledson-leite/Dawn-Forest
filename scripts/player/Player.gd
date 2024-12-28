@@ -5,7 +5,7 @@ class_name Player
 onready var sprite: Sprite = $textura
 
 var velocity: Vector2 = Vector2.ZERO
-var jumpCount: int = 0
+var jump_count: int = 0
 
 var landing: bool = false
 var attacking: bool = false
@@ -18,63 +18,71 @@ export(int) var jumpPower
 export(int) var gravity
 
 func _physics_process(delta: float):
-  horizontalMovimentEnvironment()
-  verticalMovimentEnvironment()
-  actionEnvironment()
-  gravityPlayer(delta)
+    handle_horizontal_movement()
+    handle_vertical_movement()
+    handle_actions()
+    apply_gravity(delta)
 
-  velocity = move_and_slide(velocity, Vector2.UP)
-  sprite.animated(velocity)
+    velocity = move_and_slide(velocity, Vector2.UP)
+    sprite.animated(velocity)
 
-func horizontalMovimentEnvironment() -> void:
-  var direction: float = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
-  if can_tracking_input == false or attacking:
-    velocity.x = 0
-    return
-  
-  velocity.x = direction * speed
+func handle_horizontal_movement() -> void:
+    var direction: float = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
+    if not can_tracking_input or attacking:
+        velocity.x = 0
+        return
 
+    velocity.x = direction * speed
 
-func verticalMovimentEnvironment() -> void:
-  if is_on_floor():
-    jumpCount = 0
+func handle_vertical_movement() -> void:
+    reset_jump_count_if_on_floor()
+    handle_jump()
 
-  var jump_condition: bool = can_tracking_input and  not attacking
-  if Input.is_action_just_pressed("ui_select") and jumpCount < 2  and jump_condition:
-    jumpCount += 1
-    velocity.y = -jumpPower
+func reset_jump_count_if_on_floor() -> void:
+    if is_on_floor():
+        jump_count = 0
 
-func actionEnvironment() -> void:
-  attack()
-  defense()
-  crouch()
+func handle_jump() -> void:
+    var jump_condition: bool = can_tracking_input and not attacking
+    if Input.is_action_just_pressed("ui_select") and jump_count < 2 and jump_condition:
+        jump_count += 1
+        velocity.y = -jumpPower
 
-func attack() -> void:
-  var attack_condition: bool = not attacking and not defending and not crouching
-  if Input.is_action_just_pressed("attack") and attack_condition and is_on_floor():
+func handle_actions() -> void:
+    handle_attack()
+    handle_defense()
+    handle_crouch()
+
+func handle_attack() -> void:
+    if can_attack() and Input.is_action_just_pressed("attack"):
+        start_attack()
+
+func can_attack() -> bool:
+    return not attacking and not defending and not crouching and is_on_floor()
+
+func start_attack() -> void:
     attacking = true
     sprite.normal_attack = true
-  
 
-func defense() -> void:
-  if Input.is_action_pressed("defense") and not crouching and is_on_floor():
-    defending = true
-    can_tracking_input = false
-  elif not crouching:
-    defending = false
-    can_tracking_input = true
-    sprite.shield_off = true
+func handle_defense() -> void:
+    if Input.is_action_pressed("defense") and not crouching and is_on_floor():
+        defending = true
+        can_tracking_input = false
+    elif not crouching:
+        defending = false
+        can_tracking_input = true
+        sprite.shield_off = true
 
-func crouch() -> void:
-  if Input.is_action_pressed("crouch") and not defending and is_on_floor():
-    crouching = true
-    can_tracking_input = false
-  elif not defending:
-    crouching = false
-    can_tracking_input = true
-    sprite.crouch_off = true
+func handle_crouch() -> void:
+    if Input.is_action_pressed("crouch") and not defending and is_on_floor():
+        crouching = true
+        can_tracking_input = false
+    elif not defending:
+        crouching = false
+        can_tracking_input = true
+        sprite.crouch_off = true
 
-func gravityPlayer(delta: float) -> void:
-  velocity.y += gravity * delta
-  if velocity.y >= gravity:
-    velocity.y = gravity
+func apply_gravity(delta: float) -> void:
+    velocity.y += gravity * delta
+    if velocity.y >= gravity:
+        velocity.y = gravity
